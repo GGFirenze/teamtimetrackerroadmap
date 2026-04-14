@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PS Time Tracker — Project Showcase</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0f1117;--bg2:#161822;--bg3:#1e2030;--bg4:#262940;
+    --text:#e2e4f0;--text2:#a0a4c0;--text3:#6b6f8e;
+    --accent:#6c63ff;--accent2:#8b83ff;--accent-glow:rgba(108,99,255,.15);
+    --green:#34d399;--green-bg:rgba(52,211,153,.12);
+    --amber:#fbbf24;--amber-bg:rgba(251,191,36,.12);
+    --red:#f87171;--blue:#60a5fa;--blue-bg:rgba(96,165,250,.12);
+    --pink:#f472b6;--pink-bg:rgba(244,114,182,.12);
+    --border:#2a2d45;--radius:12px;--radius-sm:8px;
+  }
+  html{scroll-behavior:smooth;font-size:16px}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;line-height:1.6;overflow-x:hidden}
+
+  /* ---- NAV ---- */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(15,17,23,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 2rem}
+  nav .nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
+  nav .logo{font-weight:700;font-size:1rem;color:var(--accent2);letter-spacing:-.02em}
+  nav .logo span{color:var(--text3);font-weight:400;margin-left:.5rem;font-size:.85rem}
+  nav ul{list-style:none;display:flex;gap:1.5rem}
+  nav a{color:var(--text2);text-decoration:none;font-size:.85rem;transition:color .2s}
+  nav a:hover{color:var(--accent2)}
+
+  /* ---- HERO ---- */
+  .hero{padding:8rem 2rem 4rem;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(108,99,255,.12) 0%,transparent 70%);pointer-events:none}
+  .hero h1{font-size:3rem;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:1rem;background:linear-gradient(135deg,var(--text) 0%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero p{color:var(--text2);font-size:1.15rem;max-width:600px;margin:0 auto 2rem}
+  .hero-badges{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+  .badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;border-radius:20px;font-size:.8rem;font-weight:500;border:1px solid var(--border);background:var(--bg2)}
+  .badge .dot{width:8px;height:8px;border-radius:50%}
+
+  /* ---- SECTIONS ---- */
+  section{max-width:1100px;margin:0 auto;padding:4rem 2rem}
+  .section-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:.5rem}
+  .section-title{font-size:2rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.5rem}
+  .section-subtitle{color:var(--text2);font-size:1rem;margin-bottom:2.5rem;max-width:640px}
+
+  /* ---- TIMELINE ---- */
+  .timeline{position:relative;padding-left:2.5rem}
+  .timeline::before{content:'';position:absolute;left:15px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--accent),var(--green),var(--amber))}
+  .tl-item{position:relative;margin-bottom:3rem}
+  .tl-dot{position:absolute;left:-2.5rem;top:4px;width:14px;height:14px;border-radius:50%;border:3px solid var(--bg);z-index:1}
+  .tl-dot.v1{background:var(--accent)}
+  .tl-dot.v2{background:var(--green)}
+  .tl-dot.v3{background:var(--amber)}
+  .tl-phase{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem}
+  .tl-phase.v1{color:var(--accent)}
+  .tl-phase.v2{color:var(--green)}
+  .tl-phase.v3{color:var(--amber)}
+  .tl-title{font-size:1.35rem;font-weight:700;margin-bottom:.35rem}
+  .tl-desc{color:var(--text2);font-size:.95rem;margin-bottom:1rem;max-width:600px}
+  .tl-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;display:grid;gap:.75rem}
+  .tl-card h4{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.25rem}
+  .tl-card ul{list-style:none;display:flex;flex-wrap:wrap;gap:.4rem}
+  .tl-card li{font-size:.78rem;padding:.25rem .6rem;border-radius:6px;background:var(--bg4);color:var(--text2)}
+
+  /* ---- FEATURES GRID ---- */
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.25rem}
+  .feature-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;transition:border-color .2s,transform .2s}
+  .feature-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .feature-icon{width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:.75rem}
+  .feature-card h3{font-size:1rem;font-weight:600;margin-bottom:.35rem}
+  .feature-card p{color:var(--text2);font-size:.88rem}
+
+  /* ---- ARCHITECTURE ---- */
+  .arch-diagram{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;overflow-x:auto}
+  .arch-layers{display:flex;flex-direction:column;gap:1.5rem;align-items:center}
+  .arch-layer{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;width:100%}
+  .arch-box{padding:.75rem 1.25rem;border-radius:var(--radius-sm);font-size:.85rem;font-weight:500;text-align:center;min-width:140px}
+  .arch-box.browser{background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent2)}
+  .arch-box.context{background:var(--blue-bg);border:1px solid rgba(96,165,250,.3);color:var(--blue)}
+  .arch-box.supabase{background:var(--green-bg);border:1px solid rgba(52,211,153,.3);color:var(--green)}
+  .arch-box.rls{background:var(--pink-bg);border:1px solid rgba(244,114,182,.3);color:var(--pink)}
+  .arch-arrow{color:var(--text3);font-size:1.5rem;text-align:center}
+  .arch-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);font-weight:600;text-align:center;margin-bottom:.25rem}
+
+  /* ---- EVENTS TABLE ---- */
+  .events-table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  thead{background:var(--bg3)}
+  th{text-align:left;padding:.75rem 1rem;font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);border-bottom:1px solid var(--border)}
+  td{padding:.65rem 1rem;border-bottom:1px solid var(--border);color:var(--text2)}
+  tr:hover td{background:var(--bg2)}
+  td code{font-family:'SF Mono',Consolas,monospace;font-size:.82rem;color:var(--accent2);background:var(--bg4);padding:.15rem .4rem;border-radius:4px}
+
+  /* ---- CHARTS ---- */
+  .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.25rem}
+  .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;position:relative;overflow:hidden}
+  .chart-card::after{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:0 var(--radius) 0 80px;opacity:.08}
+  .chart-card.bar::after{background:var(--accent)}
+  .chart-card.line::after{background:var(--green)}
+  .chart-card.kpi::after{background:var(--amber)}
+  .chart-card.funnel::after{background:var(--pink)}
+  .chart-card.table::after{background:var(--blue)}
+  .chart-type{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;display:inline-block;padding:.2rem .5rem;border-radius:4px}
+  .chart-type.bar{color:var(--accent);background:var(--accent-glow)}
+  .chart-type.line{color:var(--green);background:var(--green-bg)}
+  .chart-type.kpi{color:var(--amber);background:var(--amber-bg)}
+  .chart-type.funnel{color:var(--pink);background:var(--pink-bg)}
+  .chart-type.table{color:var(--blue);background:var(--blue-bg)}
+  .chart-card h3{font-size:1rem;font-weight:600;margin-bottom:.35rem}
+  .chart-card p{color:var(--text2);font-size:.85rem;margin-bottom:.5rem}
+  .chart-metric{font-size:.78rem;color:var(--text3);font-style:italic}
+
+  /* ---- REPORTING ---- */
+  .report-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1.5rem}
+  .report-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .report-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem}
+  .report-freq{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:.25rem .6rem;border-radius:4px}
+  .report-freq.weekly{color:var(--green);background:var(--green-bg)}
+  .report-freq.biweekly{color:var(--amber);background:var(--amber-bg)}
+  .report-header h3{font-size:1.05rem;font-weight:600}
+  .report-body{padding:1.25rem 1.5rem}
+  .report-body p{color:var(--text2);font-size:.9rem;margin-bottom:.75rem}
+  .report-list{list-style:none;margin-bottom:1rem}
+  .report-list li{padding:.4rem 0;font-size:.88rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem}
+  .report-list li::before{content:'';width:6px;height:6px;border-radius:50%;margin-top:.5rem;flex-shrink:0}
+  .report-card:nth-child(1) .report-list li::before{background:var(--green)}
+  .report-card:nth-child(2) .report-list li::before{background:var(--amber)}
+  .report-delivery{display:flex;align-items:center;gap:.5rem;padding:.6rem .85rem;background:var(--bg3);border-radius:var(--radius-sm);font-size:.82rem;color:var(--text2)}
+  .report-delivery strong{color:var(--text);font-weight:600}
+  .prompt-block{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;font-family:'SF Mono',Consolas,monospace;font-size:.8rem;color:var(--text2);line-height:1.7;white-space:pre-wrap;margin-top:.75rem}
+
+  /* ---- ROADMAP ---- */
+  .roadmap-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem}
+  .roadmap-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem}
+  .roadmap-col h3{font-size:.9rem;font-weight:600;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+  .roadmap-col h3 .dot{width:10px;height:10px;border-radius:50%}
+  .roadmap-col ul{list-style:none}
+  .roadmap-col li{padding:.35rem 0;font-size:.88rem;color:var(--text2);padding-left:1rem;position:relative}
+  .roadmap-col li::before{content:'';position:absolute;left:0;top:.65rem;width:5px;height:5px;border-radius:50%;background:var(--text3)}
+
+  /* ---- TECH STACK ---- */
+  .stack-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
+  .stack-tag{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .85rem;border-radius:20px;font-size:.82rem;font-weight:500;border:1px solid var(--border);background:var(--bg2);color:var(--text2);transition:border-color .2s}
+  .stack-tag:hover{border-color:var(--accent)}
+
+  /* ---- FOOTER ---- */
+  footer{text-align:center;padding:3rem 2rem;color:var(--text3);font-size:.82rem;border-top:1px solid var(--border);margin-top:2rem}
+  footer a{color:var(--accent);text-decoration:none}
+
+  /* ---- SCREENSHOTS GRID ---- */
+  .screenshots-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}
+  .screenshot-item{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:var(--bg2)}
+  .screenshot-item img{width:100%;display:block}
+  .screenshot-caption{padding:.75rem 1rem;font-size:.82rem;color:var(--text2);text-align:center;border-top:1px solid var(--border)}
+  .screenshot-item.placeholder .screenshot-placeholder-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;min-height:280px;background:var(--bg3)}
+  .screenshot-placeholder-inner span{font-size:2.5rem;margin-bottom:.5rem;opacity:.5}
+  .screenshot-placeholder-inner p{color:var(--text3);font-size:.95rem;font-weight:500;margin:0}
+  .screenshot-placeholder-hint{font-size:.78rem!important;font-weight:400!important;margin-top:.35rem!important;opacity:.6}
+  .screenshot-wide{margin-bottom:1.25rem}
+  .screenshot-wide img{width:100%;display:block;border-radius:var(--radius) var(--radius) 0 0}
+  .screenshot-wide .screenshot-caption{border-top:1px solid var(--border)}
+  .screenshot-note{margin-top:1rem;padding:.65rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;color:var(--text3);text-align:center}
+  @media(max-width:768px){.screenshots-grid{grid-template-columns:1fr}}
+
+  /* ---- RESPONSIVE ---- */
+  @media(max-width:768px){
+    .hero h1{font-size:2rem}
+    section{padding:3rem 1.25rem}
+    .report-cards{grid-template-columns:1fr}
+    nav ul{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo">PS Time Tracker <span>Project Showcase</span></div>
+    <ul>
+      <li><a href="#timeline">Timeline</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#analytics">Analytics</a></li>
+      <li><a href="#reporting">Reporting</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>From Personal Timer<br>to Team Platform</h1>
+  <p>How a weekend side-project evolved into a full-stack time tracking solution for Amplitude's 63-person Professional Services team.</p>
+  <div class="hero-badges">
+    <div class="badge"><span class="dot" style="background:var(--accent)"></span> React 18</div>
+    <div class="badge"><span class="dot" style="background:var(--green)"></span> TypeScript</div>
+    <div class="badge"><span class="dot" style="background:var(--amber)"></span> Supabase</div>
+    <div class="badge"><span class="dot" style="background:var(--pink)"></span> Google SSO</div>
+    <div class="badge"><span class="dot" style="background:var(--blue)"></span> Amplitude</div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <div class="section-label">Evolution</div>
+  <div class="section-title">Project Timeline</div>
+  <div class="section-subtitle">Three distinct phases, each building on the last while preserving the core experience.</div>
+
+  <div class="timeline">
+    <!-- V1 -->
+    <div class="tl-item">
+      <div class="tl-dot v1"></div>
+      <div class="tl-phase v1">Phase 1 &mdash; V1</div>
+      <div class="tl-title">Personal Tracker</div>
+      <div class="tl-desc">A browser-only time tracker for one person. Hardcoded project list, localStorage persistence, full Amplitude instrumentation from day one.</div>
+      <div class="tl-card">
+        <div>
+          <h4>Stack</h4>
+          <ul>
+            <li>React 18</li><li>TypeScript</li><li>Vite</li><li>LocalStorage</li><li>Amplitude SDK</li><li>GitHub Pages</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Key capabilities</h4>
+          <ul>
+            <li>Start / Pause / Stop timers</li><li>Billable vs. non-billable</li><li>Session notes on stop</li><li>Daily summary</li><li>Google Calendar embed</li><li>Session Replay (100%)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- V2 -->
+    <div class="tl-item">
+      <div class="tl-dot v2"></div>
+      <div class="tl-phase v2">Phase 2 &mdash; V2</div>
+      <div class="tl-title">Floating Widget (PiP)</div>
+      <div class="tl-desc">Added an always-on-top floating timer using the Document Picture-in-Picture API. Users can track time without switching tabs.</div>
+      <div class="tl-card">
+        <div>
+          <h4>What's new</h4>
+          <ul>
+            <li>Pop Out / Pop In button</li><li>Compact floating timer</li><li>Quick-start project picker</li><li>Notes modal in PiP</li><li>State sync via React Portal</li>
+          </ul>
+        </div>
+        <div>
+          <h4>New analytics</h4>
+          <ul>
+            <li>Widget Popped Out / In events</li><li>source property (main / pip_widget)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- V3 -->
+    <div class="tl-item">
+      <div class="tl-dot v3"></div>
+      <div class="tl-phase v3">Phase 3 &mdash; Team Edition (current)</div>
+      <div class="tl-title">Multi-User Platform</div>
+      <div class="tl-desc">Replaced localStorage with Supabase. Added Google SSO, admin panel, per-user project assignments, and Row Level Security. Ready for 63 users.</div>
+      <div class="tl-card">
+        <div>
+          <h4>New infrastructure</h4>
+          <ul>
+            <li>Supabase (Postgres)</li><li>Google SSO (OAuth)</li><li>Row Level Security</li><li>Admin panel</li><li>User profiles</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Admin capabilities</h4>
+          <ul>
+            <li>Create / archive projects</li><li>Assign projects to users</li><li>View all team members</li><li>Manage billable categories</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section style="padding-top:0">
+  <div class="section-label">In Action</div>
+  <div class="section-title" style="margin-bottom:1.5rem">App Screenshots</div>
+  <div class="screenshot-item screenshot-wide">
+    <img src="screenshots/pip-widget.png" alt="Floating PiP widget alongside the main app" />
+    <div class="screenshot-caption">Floating PiP widget &mdash; always-on-top timer with quick-start project picker, alongside the main app</div>
+  </div>
+  <div class="screenshots-grid">
+    <div class="screenshot-item">
+      <img src="screenshots/main-active-timer.png" alt="Main view with active timer running" />
+      <div class="screenshot-caption">Main view &mdash; active timer with pause/stop controls</div>
+    </div>
+    <div class="screenshot-item">
+      <img src="screenshots/notes-modal.png" alt="Session notes modal after stopping a timer" />
+      <div class="screenshot-caption">Session notes modal &mdash; captures work context on timer stop</div>
+    </div>
+    <div class="screenshot-item">
+      <img src="screenshots/login-page.png" alt="Google SSO login page" />
+      <div class="screenshot-caption">Login page &mdash; Google SSO for @amplitude.com accounts</div>
+    </div>
+    <div class="screenshot-item">
+      <img src="screenshots/admin-panel.png" alt="Admin panel with project management" />
+      <div class="screenshot-caption">Admin panel &mdash; create projects, manage assignments</div>
+    </div>
+  </div>
+  <div class="screenshot-note">&#9888; Project names in screenshots above are illustrative. Actual client names have been redacted for confidentiality.</div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">Capabilities</div>
+  <div class="section-title">Feature Highlights</div>
+  <div class="section-subtitle">Everything the team needs to track time accurately and effortlessly.</div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--accent-glow);color:var(--accent2)">&#9201;</div>
+      <h3>Precision Timer</h3>
+      <p>Start, pause, resume, and stop timers per project. Elapsed time updates every second. Pause tracking preserves accuracy.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--green-bg);color:var(--green)">&#8599;</div>
+      <h3>Floating Widget</h3>
+      <p>Pop out a compact always-on-top timer using the Document PiP API. Track time without leaving your current workflow.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--amber-bg);color:var(--amber)">&#128221;</div>
+      <h3>Session Notes</h3>
+      <p>Capture what you worked on when stopping a timer. Notes feed directly into automated biweekly reports.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--pink-bg);color:var(--pink)">&#128274;</div>
+      <h3>Google SSO</h3>
+      <p>Sign in with your @amplitude.com Google account. No extra passwords. Internal-only access enforced at the OAuth level.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--blue-bg);color:var(--blue)">&#128101;</div>
+      <h3>Admin Panel</h3>
+      <p>Admins create projects, manage categories, and assign them to team members. Users see only their relevant projects.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--accent-glow);color:var(--accent2)">&#128200;</div>
+      <h3>Amplitude Analytics</h3>
+      <p>Every timer action is instrumented. Charts, funnels, and automated reports deliver insights without manual effort.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-label">System Design</div>
+  <div class="section-title">Architecture</div>
+  <div class="section-subtitle">A clean separation between the React frontend and the Supabase backend, secured by Row Level Security.</div>
+
+  <div class="arch-diagram">
+    <div class="arch-layers">
+      <div class="arch-label">Frontend (React 18 + TypeScript + Vite)</div>
+      <div class="arch-layer">
+        <div class="arch-box browser">App Shell</div>
+        <div class="arch-box browser">PiP Widget</div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-box context">AuthContext</div>
+        <div class="arch-box context">ProjectContext</div>
+        <div class="arch-box context">TimerContext</div>
+      </div>
+      <div class="arch-arrow">&darr; &nbsp; Supabase JS Client &nbsp; &darr;</div>
+      <div class="arch-label">Backend (Supabase)</div>
+      <div class="arch-layer">
+        <div class="arch-box supabase">auth.users</div>
+        <div class="arch-box supabase">profiles</div>
+        <div class="arch-box supabase">projects</div>
+        <div class="arch-box supabase">user_projects</div>
+        <div class="arch-box supabase">time_entries</div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-box rls">RLS: users see own data only</div>
+        <div class="arch-box rls">RLS: admins manage all</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:2rem">
+    <div class="section-label">Tech Stack</div>
+    <div class="stack-row">
+      <span class="stack-tag">React 18</span>
+      <span class="stack-tag">TypeScript</span>
+      <span class="stack-tag">Vite</span>
+      <span class="stack-tag">Supabase</span>
+      <span class="stack-tag">PostgreSQL</span>
+      <span class="stack-tag">Google OAuth</span>
+      <span class="stack-tag">Document PiP API</span>
+      <span class="stack-tag">Amplitude Browser SDK</span>
+      <span class="stack-tag">CSS Custom Properties</span>
+      <span class="stack-tag">GitHub Pages</span>
+    </div>
+  </div>
+</section>
+
+<!-- ANALYTICS -->
+<section id="analytics">
+  <div class="section-label">Instrumentation</div>
+  <div class="section-title">Amplitude Analytics</div>
+  <div class="section-subtitle">A structured event taxonomy powers all charts, funnels, and automated reports.</div>
+
+  <div class="events-table-wrap">
+    <table>
+      <thead>
+        <tr><th>Event</th><th>Properties</th><th>Trigger</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Timer Started</code></td><td>project_name, is_billable, source</td><td>User starts a timer</td></tr>
+        <tr><td><code>Timer Paused</code></td><td>project_name, is_billable, duration_seconds, source</td><td>User pauses a timer</td></tr>
+        <tr><td><code>Timer Stopped</code></td><td>project_name, is_billable, duration_seconds, source</td><td>User stops a timer</td></tr>
+        <tr><td><code>Note Submitted</code></td><td>project_name, is_billable, note_text</td><td>User saves a session note</td></tr>
+        <tr><td><code>Note Skipped</code></td><td>project_name, is_billable</td><td>User skips the note</td></tr>
+        <tr><td><code>Widget Popped Out</code></td><td>&mdash;</td><td>User opens the floating widget</td></tr>
+        <tr><td><code>Widget Popped In</code></td><td>&mdash;</td><td>User closes the floating widget back into the main app</td></tr>
+        <tr><td><code>Project Created</code></td><td>project_name, is_billable</td><td>Admin creates a project</td></tr>
+        <tr><td><code>Project Assigned</code></td><td>project_name, user_email</td><td>Admin assigns a project</td></tr>
+        <tr><td><code>Sign In Completed</code></td><td>auth_provider</td><td>User completes login</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:3rem">
+    <div class="section-label">Dashboards</div>
+    <div class="section-title" style="font-size:1.5rem">Key Charts</div>
+    <div class="section-subtitle">Seven charts that answer the most important questions about team time allocation.</div>
+
+    <div class="charts-grid">
+      <div class="chart-card bar">
+        <span class="chart-type bar">Stacked Bar</span>
+        <h3>Daily Time Tracked</h3>
+        <p>Billable vs. non-billable hours per day, at a glance.</p>
+        <div class="chart-metric">SUM(duration_seconds) from Timer Stopped, segmented by is_billable</div>
+      </div>
+      <div class="chart-card bar">
+        <span class="chart-type bar">Horizontal Bar</span>
+        <h3>Time by Project</h3>
+        <p>Which projects consume the most hours over the last 14 days.</p>
+        <div class="chart-metric">SUM(duration_seconds) segmented by project_name</div>
+      </div>
+      <div class="chart-card line">
+        <span class="chart-type line">Line Chart</span>
+        <h3>Team Utilization</h3>
+        <p>Daily active users tracking time. Measures adoption across the team.</p>
+        <div class="chart-metric">COUNT(DISTINCT users) who fired Timer Started, by day</div>
+      </div>
+      <div class="chart-card kpi">
+        <span class="chart-type kpi">KPI</span>
+        <h3>Billable Ratio</h3>
+        <p>The team's overall billable utilization rate as a single number.</p>
+        <div class="chart-metric">SUM(billable hours) / SUM(total hours)</div>
+      </div>
+      <div class="chart-card funnel">
+        <span class="chart-type funnel">Funnel</span>
+        <h3>PiP Widget Adoption</h3>
+        <p>From opening the floating widget to actually using it for timers.</p>
+        <div class="chart-metric">Widget Popped Out &rarr; Timer Started (source = pip_widget)</div>
+      </div>
+      <div class="chart-card funnel">
+        <span class="chart-type funnel">Funnel</span>
+        <h3>Notes Completion Rate</h3>
+        <p>How consistently people capture session notes vs. skipping them.</p>
+        <div class="chart-metric">Timer Stopped &rarr; Note Submitted vs. Note Skipped</div>
+      </div>
+      <div class="chart-card table">
+        <span class="chart-type table">Table</span>
+        <h3>Time by User</h3>
+        <p>Individual breakdown for biweekly reports and manager reviews.</p>
+        <div class="chart-metric">SUM(duration_seconds) grouped by user, segmented by is_billable</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUTOMATED REPORTING -->
+<section id="reporting">
+  <div class="section-label">Automation</div>
+  <div class="section-title">Automated Slack Reports</div>
+  <div class="section-subtitle">Two recurring reports delivered to Slack, eliminating manual report compilation.</div>
+
+  <div class="report-cards">
+    <!-- Weekly -->
+    <div class="report-card">
+      <div class="report-header">
+        <span class="report-freq weekly">Every Friday</span>
+        <h3>Weekly Summary</h3>
+      </div>
+      <div class="report-body">
+        <p>Delivered via <strong>Amplitude Automated Reports</strong> &mdash; a scheduled dashboard snapshot sent to Slack.</p>
+        <ul class="report-list">
+          <li>Total billable hours (team aggregate)</li>
+          <li>Total non-billable hours</li>
+          <li>Billable ratio percentage</li>
+          <li>Top 5 projects by time spent</li>
+          <li>Team utilization (active users / team size)</li>
+          <li>Week-over-week comparison (delta)</li>
+        </ul>
+        <div class="report-delivery">
+          <strong>Slack:</strong>&nbsp; Individual DMs &nbsp;&middot;&nbsp; Fridays at 9:00 AM
+        </div>
+      </div>
+    </div>
+
+    <!-- Biweekly -->
+    <div class="report-card">
+      <div class="report-header">
+        <span class="report-freq biweekly">Every Other Friday</span>
+        <h3>Biweekly Notes Digest</h3>
+      </div>
+      <div class="report-body">
+        <p>Delivered via <strong>Amplitude AI Agent</strong> &mdash; reads all session notes from the past two weeks, groups by project, and generates a leadership-ready summary.</p>
+        <ul class="report-list">
+          <li>Total hours per project</li>
+          <li>Key activities and themes from notes</li>
+          <li>Notable patterns or concerns flagged by AI</li>
+          <li>Formatted for leadership review</li>
+        </ul>
+        <div class="report-delivery">
+          <strong>Slack:</strong>&nbsp; DM or #ps-leads &nbsp;&middot;&nbsp; Every other Friday at 8:00 AM
+        </div>
+        <div class="prompt-block">Summarize the session notes submitted by the PS team
+over the last 2 weeks. Group by project. For each:
+&bull; Total hours tracked
+&bull; Key activities and themes from notes
+&bull; Notable patterns or concerns
+
+Format as a concise biweekly report for leadership.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="section-label">What's Next</div>
+  <div class="section-title">Roadmap</div>
+  <div class="section-subtitle">Planned enhancements across three horizons.</div>
+
+  <div class="roadmap-cols">
+    <div class="roadmap-col">
+      <h3><span class="dot" style="background:var(--green)"></span> Immediate</h3>
+      <ul>
+        <li>Deploy to Netlify or Vercel</li>
+        <li>Push to GitHub (new repo)</li>
+        <li>Add Amplitude SDK with project API key</li>
+        <li>Seed all PS projects via admin panel</li>
+        <li>Invite the team (Google SSO)</li>
+      </ul>
+    </div>
+    <div class="roadmap-col">
+      <h3><span class="dot" style="background:var(--amber)"></span> Short-term</h3>
+      <ul>
+        <li>Keyboard shortcuts in PiP widget</li>
+        <li>CSV / Google Sheets export</li>
+        <li>Date range picker for time log</li>
+        <li>Bulk project assignment</li>
+      </ul>
+    </div>
+    <div class="roadmap-col">
+      <h3><span class="dot" style="background:var(--accent)"></span> Medium-term</h3>
+      <ul>
+        <li>Team dashboard (manager view)</li>
+        <li>Mavenlink / PSA tool integration</li>
+        <li>Daily / weekly email digest per user</li>
+        <li>Mobile-responsive PiP alternative</li>
+      </ul>
+    </div>
+    <div class="roadmap-col">
+      <h3><span class="dot" style="background:var(--pink)"></span> Long-term</h3>
+      <ul>
+        <li>AI-generated biweekly reports</li>
+        <li>Smart project suggestions from calendar</li>
+        <li>Budget tracking (est. vs. actual)</li>
+        <li>Client-facing time reports</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>PS Time Tracker &mdash; Built by Giuliano Giannini &nbsp;&middot;&nbsp; Amplitude Professional Services</p>
+  <p style="margin-top:.35rem"><a href="https://ggfirenze.github.io/PSTimeTracker/" target="_blank">Live V2 Demo</a></p>
+</footer>
+
+<script src="https://cdn.amplitude.com/script/6f8126a2bdc9cfff75fa607fa12cf019.js"></script>
+<script>
+window.amplitude.add(window.sessionReplay.plugin({sampleRate:1}));
+window.amplitude.init('6f8126a2bdc9cfff75fa607fa12cf019',{
+  fetchRemoteConfig:true,
+  autocapture:{
+    attribution:true,
+    pageViews:true,
+    sessions:false,
+    formInteractions:false,
+    fileDownloads:false,
+    elementInteractions:false,
+    frustrationInteractions:true
+  }
+});
+document.querySelectorAll('nav a').forEach(function(link){
+  link.addEventListener('click',function(){
+    window.amplitude.track('Nav Menu Clicked',{button_name:this.textContent.trim()});
+  });
+});
+</script>
+</body>
+</html>
