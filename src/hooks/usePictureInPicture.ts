@@ -35,7 +35,7 @@ export function usePictureInPicture() {
 
     const pip = await window.documentPictureInPicture!.requestWindow({
       width: 360,
-      height: 480,
+      height: 580,
     });
 
     cloneStyles(document, pip.document);

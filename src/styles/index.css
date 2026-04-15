@@ -1168,11 +1168,12 @@ body {
   font-family: var(--font-family);
   color: var(--color-text);
   background: var(--color-bg);
-  min-height: 100vh;
+  height: 100vh;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 0;
+  overflow: hidden;
 }
 
 .pip-timer {
@@ -1264,6 +1265,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
   flex: 1;
   overflow-y: auto;
 }
