@@ -41,20 +41,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    if (!error) setProfile(data);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      if (error) {
+        console.error('Failed to fetch profile:', error.message);
+        return;
+      }
+      setProfile(data);
+    } catch (err) {
+      console.error('Profile fetch exception:', err);
+    }
   }, []);
 
   useEffect(() => {
+    let settled = false;
+
+    const AUTH_TIMEOUT_MS = 5000;
+    const timeout = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        setIsLoading(false);
+      }
+    }, AUTH_TIMEOUT_MS);
+
     supabase.auth.getSession().then(async ({ data: { session: s } }) => {
+      if (settled) return;
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) await fetchProfile(s.user.id);
+      settled = true;
+      clearTimeout(timeout);
       setIsLoading(false);
+    }).catch(() => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeout);
+        setIsLoading(false);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -66,11 +93,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setProfile(null);
         }
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeout);
+        }
         setIsLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, [fetchProfile]);
 
   const signInWithGoogle = useCallback(async () => {
@@ -83,7 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch {
+      // Force clear even if signOut API fails
+    }
     setUser(null);
     setSession(null);
     setProfile(null);
