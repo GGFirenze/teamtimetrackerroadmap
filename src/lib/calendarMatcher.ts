@@ -25,8 +25,21 @@ const NOISE_WORDS = new Set([
   'weekly', 'sync', 'meeting', 'call', 'check', 'in', 'up',
   'the', 'and', 'for', 'with', 'quick', 'bi', 'biweekly',
   'monthly', 'daily', 'standup', 'review', 'update', 'chat',
-  '1:1', 'gg', 'giuliano', 'amplitude',
+  '1:1', 'gg', 'giuliano', 'amplitude', 'time', 'hours',
+  'placeholder', 'prep', 'session', 'workshop', 'all', 'hands',
+  'speaker', 'hq', 'celebration',
 ]);
+
+const INTERNAL_MEETING_PATTERNS = [
+  /\ball[\s-]?hands\b/i,
+  /\b1[:\s]1\b/i,
+  /\bone[\s-]?on[\s-]?one\b/i,
+  /\btown[\s-]?hall\b/i,
+  /\bteam[\s-]?standup\b/i,
+  /\bskills?\s+sharing\b/i,
+  /\bretro(spective)?\b/i,
+  /\bsprint\s+(planning|review)\b/i,
+];
 
 export function matchEvents(
   events: CalendarEvent[],
@@ -48,9 +61,14 @@ export function matchEvents(
     }
   }
 
+  const internalMeetingsProject = projects.find(
+    (p) => p.name.toLowerCase() === 'internal meetings'
+  );
+
   return events.map((event) => {
     const tokens = tokenize(event.title);
 
+    // Priority 1: Saved keyword mappings
     for (const token of tokens) {
       const mappedId = mappingIndex.get(token);
       if (mappedId) {
@@ -58,6 +76,12 @@ export function matchEvents(
       }
     }
 
+    // Priority 2: Known internal meeting patterns -> "Internal Meetings" project
+    if (internalMeetingsProject && INTERNAL_MEETING_PATTERNS.some((p) => p.test(event.title))) {
+      return { ...event, matchedProjectId: internalMeetingsProject.id, matchSource: 'project_name' as const };
+    }
+
+    // Priority 3: Direct token match against project names
     for (const token of tokens) {
       if (NOISE_WORDS.has(token)) continue;
       const projectId = projectNameIndex.get(token);
@@ -66,6 +90,7 @@ export function matchEvents(
       }
     }
 
+    // Priority 4: Substring match (e.g., "JPM Fintech" in event title)
     for (const [projectName, projectId] of projectNameIndex) {
       if (event.title.toLowerCase().includes(projectName) && projectName.length >= 3) {
         return { ...event, matchedProjectId: projectId, matchSource: 'project_name' as const };
