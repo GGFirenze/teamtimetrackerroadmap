@@ -1,15 +1,40 @@
 import { createPortal } from 'react-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProjectProvider } from './context/ProjectContext';
-import { TimerProvider } from './context/TimerContext';
+import { TimerProvider, useTimerContext } from './context/TimerContext';
 import { LoginPage } from './components/LoginPage';
 import { Header } from './components/Header';
 import { ActiveTimer } from './components/ActiveTimer';
 import { ProjectGrid } from './components/ProjectGrid';
 import { NotesModal } from './components/NotesModal';
+import { IdleWarningModal } from './components/IdleWarningModal';
 import { TimeLog } from './components/TimeLog';
 import { FloatingWidget } from './components/FloatingWidget';
 import { usePictureInPicture } from './hooks/usePictureInPicture';
+import { useIdleTimeout } from './hooks/useIdleTimeout';
+
+function IdleTimeoutManager({ pipWindow }: { pipWindow: Window | null }) {
+  const { currentEntry, idleStop } = useTimerContext();
+  const isTimerActive = currentEntry?.status === 'active';
+
+  const { isWarning, warningSecondsLeft, dismissWarning } = useIdleTimeout(
+    isTimerActive,
+    idleStop
+  );
+
+  if (!isWarning) return null;
+
+  return (
+    <>
+      <IdleWarningModal secondsLeft={warningSecondsLeft} onDismiss={dismissWarning} />
+      {pipWindow &&
+        createPortal(
+          <IdleWarningModal secondsLeft={warningSecondsLeft} onDismiss={dismissWarning} />,
+          pipWindow.document.body
+        )}
+    </>
+  );
+}
 
 function AuthenticatedApp() {
   const { pipWindow, isOpen, openPiP, closePiP, isSupported } =
@@ -39,6 +64,7 @@ function AuthenticatedApp() {
             </>,
             pipWindow.document.body
           )}
+        <IdleTimeoutManager pipWindow={pipWindow} />
       </TimerProvider>
     </ProjectProvider>
   );

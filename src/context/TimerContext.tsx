@@ -22,6 +22,7 @@ import {
   trackTimerStopped,
   type TimerSource,
 } from '../analytics';
+import { roundDownTo30Min } from '../hooks/useIdleTimeout';
 
 interface PendingStop {
   entry: TimeEntry;
@@ -36,6 +37,7 @@ interface TimerContextValue {
   pauseTimer: (source?: TimerSource) => void;
   resumeTimer: (source?: TimerSource) => void;
   requestStop: (source?: TimerSource) => void;
+  idleStop: () => void;
   confirmStop: (note: string) => void;
   cancelStop: () => void;
   deleteEntry: (entryId: string) => void;
@@ -222,6 +224,37 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     [currentEntry, getProject, persist]
   );
 
+  const idleStop = useCallback(() => {
+    if (!currentEntry) return;
+    const now = Date.now();
+    const rewindedEnd = roundDownTo30Min(now);
+    const effectiveEnd = Math.max(currentEntry.startTime, rewindedEnd);
+    const elapsedMs = effectiveEnd - currentEntry.startTime - currentEntry.totalPausedMs;
+    const project = getProject(currentEntry.projectId);
+
+    const completed: TimeEntry = {
+      ...currentEntry,
+      endTime: effectiveEnd,
+      totalSeconds: Math.max(0, Math.floor(elapsedMs / 1000)),
+      pausedAt: null,
+      status: 'completed',
+      note: '[Auto-stopped due to inactivity]',
+    };
+
+    setCurrentEntry(null);
+    persist(completed);
+    setEntries((prev) => [completed, ...prev]);
+
+    if (project) {
+      trackTimerStopped(
+        project.name,
+        project.category === 'billable',
+        completed.totalSeconds,
+        'main'
+      );
+    }
+  }, [currentEntry, getProject, persist]);
+
   const confirmStop = useCallback(
     (note: string) => {
       if (!pendingStop) return;
@@ -283,6 +316,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         pauseTimer,
         resumeTimer,
         requestStop,
+        idleStop,
         confirmStop,
         cancelStop,
         deleteEntry,
