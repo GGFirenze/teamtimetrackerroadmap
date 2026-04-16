@@ -1,13 +1,25 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTimerContext } from '../context/TimerContext';
 import { useProjectContext } from '../context/ProjectContext';
 import { formatTime } from '../hooks/useTimer';
 import { trackNoteViewed, trackNoteSubmitted, trackNoteSkipped } from '../analytics';
+import { useSpeechRecognition, isSpeechSupported } from '../hooks/useSpeechRecognition';
 
 export function NotesModal() {
   const { pendingStop, confirmStop, cancelStop } = useTimerContext();
   const { getProject } = useProjectContext();
   const [note, setNote] = useState('');
+  const noteRef = useRef(note);
+  noteRef.current = note;
+
+  const handleTranscript = useCallback((text: string) => {
+    setNote((prev) => {
+      const separator = prev && !prev.endsWith(' ') ? ' ' : '';
+      return prev + separator + text;
+    });
+  }, []);
+
+  const { isListening, toggle: toggleMic } = useSpeechRecognition(handleTranscript);
 
   const prevPendingRef = useRef<string | null>(null);
 
@@ -77,19 +89,32 @@ export function NotesModal() {
         </div>
 
         <div className="modal-notes">
-          <label className="modal-label" htmlFor="session-notes">
-            Session Notes
-            <span className="modal-label-hint">
-              What did you work on? Any updates for the biweekly report?
-            </span>
-          </label>
+          <div className="modal-label-row">
+            <label className="modal-label" htmlFor="session-notes">
+              Session Notes
+              <span className="modal-label-hint">
+                What did you work on? Any updates for the biweekly report?
+              </span>
+            </label>
+            {isSpeechSupported && (
+              <button
+                className={`mic-btn ${isListening ? 'mic-btn--active' : ''}`}
+                onClick={toggleMic}
+                type="button"
+                title={isListening ? 'Stop dictation' : 'Dictate note'}
+              >
+                <span className="mic-btn-icon">{isListening ? '⏹' : '🎙'}</span>
+                {isListening ? 'Listening...' : 'Dictate'}
+              </button>
+            )}
+          </div>
           <textarea
             id="session-notes"
-            className="modal-textarea"
+            className={`modal-textarea ${isListening ? 'modal-textarea--listening' : ''}`}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="E.g., Configured event taxonomy for onboarding flow..."
+            placeholder={isListening ? 'Speak now...' : 'E.g., Configured event taxonomy for onboarding flow...'}
             rows={4}
             autoFocus
           />

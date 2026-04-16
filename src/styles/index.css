@@ -584,6 +584,56 @@ body {
   color: var(--color-text-muted);
 }
 
+.modal-label-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mic-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.mic-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.mic-btn--active {
+  border-color: var(--color-danger);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+  animation: micPulse 1.5s ease-in-out infinite;
+}
+
+.mic-btn-icon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.modal-textarea--listening {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+@keyframes micPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 .modal-textarea {
   width: 100%;
   padding: 12px 16px;
