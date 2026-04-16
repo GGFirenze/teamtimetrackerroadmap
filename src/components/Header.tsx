@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTimerContext } from '../context/TimerContext';
 import { useAuth } from '../context/AuthContext';
 import { formatTimeCompact } from '../hooks/useTimer';
-import { trackPopOutClicked } from '../analytics';
+import { trackWidgetPoppedOut, trackWidgetPoppedIn } from '../analytics';
 import { AdminPanel } from './AdminPanel';
 import { ManageProjectsModal } from './BrowseProjectsModal';
 import { useProjectContext } from '../context/ProjectContext';
@@ -63,7 +63,8 @@ export function Header({ pipSupported, pipOpen, onTogglePiP }: HeaderProps) {
             <button
               className={`pip-toggle-btn ${pipOpen ? 'pip-toggle-btn--active' : ''}`}
               onClick={() => {
-                if (!pipOpen) trackPopOutClicked();
+                if (!pipOpen) trackWidgetPoppedOut();
+                else trackWidgetPoppedIn();
                 onTogglePiP();
               }}
               title={pipOpen ? 'Close floating widget' : 'Open floating widget'}

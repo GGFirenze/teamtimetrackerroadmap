@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { supabase, restQuery, getAccessToken } from '../lib/supabase';
+import { identifyUser, resetUser, trackSignInCompleted } from '../analytics';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface Profile {
@@ -105,6 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const token = s.access_token || getAccessToken();
           const p = await fetchProfileViaRest(s.user.id, token);
           setProfile(p);
+          if (p) {
+            identifyUser(p.id, p.email, p.full_name);
+          }
+          if (event === 'SIGNED_IN') {
+            trackSignInCompleted();
+          }
         } else {
           setProfile(null);
         }
@@ -122,6 +129,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(s.user);
       const p = await fetchProfileViaRest(s.user.id, s.access_token);
       setProfile(p);
+      if (p) {
+        identifyUser(p.id, p.email, p.full_name);
+      }
       settle();
     }).catch((err) => {
       console.error('getSession failed:', err);
@@ -156,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     localStorage.removeItem(GOOGLE_TOKEN_KEY);
     setGoogleToken(null);
+    resetUser();
     setUser(null);
     setSession(null);
     setProfile(null);
