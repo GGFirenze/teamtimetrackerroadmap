@@ -9,17 +9,22 @@ export function NotesModal() {
   const { pendingStop, confirmStop, cancelStop } = useTimerContext();
   const { getProject } = useProjectContext();
   const [note, setNote] = useState('');
-  const noteRef = useRef(note);
-  noteRef.current = note;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleTranscript = useCallback((text: string) => {
     setNote((prev) => {
       const separator = prev && !prev.endsWith(' ') ? ' ' : '';
       return prev + separator + text;
     });
+    textareaRef.current?.focus();
   }, []);
 
   const { isListening, toggle: toggleMic } = useSpeechRecognition(handleTranscript);
+
+  const handleMicClick = () => {
+    toggleMic();
+    requestAnimationFrame(() => textareaRef.current?.focus());
+  };
 
   const prevPendingRef = useRef<string | null>(null);
 
@@ -99,7 +104,7 @@ export function NotesModal() {
             {isSpeechSupported && (
               <button
                 className={`mic-btn ${isListening ? 'mic-btn--active' : ''}`}
-                onClick={toggleMic}
+                onClick={handleMicClick}
                 type="button"
                 title={isListening ? 'Stop dictation' : 'Dictate note'}
               >
@@ -109,6 +114,7 @@ export function NotesModal() {
             )}
           </div>
           <textarea
+            ref={textareaRef}
             id="session-notes"
             className={`modal-textarea ${isListening ? 'modal-textarea--listening' : ''}`}
             value={note}
