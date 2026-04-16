@@ -75,6 +75,7 @@ export function trackNoteSubmitted(projectName: string, isBillable: boolean, not
   amplitude.track('Note Submitted', {
     project_name: projectName,
     is_billable: isBillable,
+    note_text: noteText,
     note_length: noteText.length,
   });
 }
