@@ -256,20 +256,42 @@
     <!-- V3 -->
     <div class="tl-item">
       <div class="tl-dot v3"></div>
-      <div class="tl-phase v3">Phase 3 &mdash; Team Edition (current)</div>
+      <div class="tl-phase v3">Phase 3 &mdash; Team Edition</div>
       <div class="tl-title">Multi-User Platform</div>
-      <div class="tl-desc">Replaced localStorage with Supabase. Added Google SSO, admin panel, per-user project assignments, and Row Level Security. Ready for 63 users.</div>
+      <div class="tl-desc">Replaced localStorage with Supabase. Added Google SSO, admin panel, per-user project assignments, and Row Level Security. Deployed to Vercel. Ready for 63 users.</div>
       <div class="tl-card">
         <div>
           <h4>New infrastructure</h4>
           <ul>
-            <li>Supabase (Postgres)</li><li>Google SSO (OAuth)</li><li>Row Level Security</li><li>Admin panel</li><li>User profiles</li>
+            <li>Supabase (Postgres)</li><li>Google SSO (OAuth)</li><li>Row Level Security</li><li>Admin panel</li><li>User profiles</li><li>Vercel deployment</li>
           </ul>
         </div>
         <div>
           <h4>Admin capabilities</h4>
           <ul>
-            <li>Create / archive projects</li><li>Assign projects to users</li><li>View all team members</li><li>Manage billable categories</li>
+            <li>Create / archive projects</li><li>Bulk assign (Select All / Deselect All)</li><li>User-centric project view</li><li>Manage billable categories</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- V4 -->
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--pink)"></div>
+      <div class="tl-phase" style="color:var(--pink)">Phase 4 &mdash; Smart Automation (current)</div>
+      <div class="tl-title">Calendar Sync &amp; Intelligence</div>
+      <div class="tl-desc">Google Calendar integration with auto-start/stop timers, idle timeout detection, Amplitude SDK instrumentation, and self-serve project management.</div>
+      <div class="tl-card">
+        <div>
+          <h4>What's new</h4>
+          <ul>
+            <li>Google Calendar API integration</li><li>Auto-start/stop timers from meetings</li><li>Smart event-to-project matching</li><li>Keyword memory (learns over time)</li><li>Idle timeout (30min + 5min warning)</li><li>Manage Projects with type-to-confirm removal</li>
+          </ul>
+        </div>
+        <div>
+          <h4>New analytics</h4>
+          <ul>
+            <li>Amplitude Browser SDK integrated</li><li>source: calendar for timer events</li><li>Calendar Event Linked</li><li>Idle Timeout event</li><li>Project Removed event</li><li>Sign In Completed with user identity</li>
           </ul>
         </div>
       </div>
@@ -343,6 +365,16 @@
       <h3>Amplitude Analytics</h3>
       <p>Every timer action is instrumented. Charts, funnels, and automated reports deliver insights without manual effort.</p>
     </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--green-bg);color:var(--green)">&#128197;</div>
+      <h3>Calendar Sync</h3>
+      <p>Google Calendar integration auto-starts and stops timers based on your meetings. Smart matching learns which events map to which projects.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:var(--amber-bg);color:var(--amber)">&#9203;</div>
+      <h3>Idle Timeout</h3>
+      <p>Detects 30 minutes of inactivity, warns for 5 minutes, then auto-stops and rewinds to the nearest half-hour. No more runaway timers.</p>
+    </div>
   </div>
 </section>
 
@@ -358,13 +390,14 @@
       <div class="arch-layer">
         <div class="arch-box browser">App Shell</div>
         <div class="arch-box browser">PiP Widget</div>
+        <div class="arch-box browser">Calendar Sidebar</div>
       </div>
       <div class="arch-layer">
         <div class="arch-box context">AuthContext</div>
         <div class="arch-box context">ProjectContext</div>
         <div class="arch-box context">TimerContext</div>
       </div>
-      <div class="arch-arrow">&darr; &nbsp; Supabase JS Client &nbsp; &darr;</div>
+      <div class="arch-arrow">&darr; &nbsp; Supabase JS Client + Google Calendar API &nbsp; &darr;</div>
       <div class="arch-label">Backend (Supabase)</div>
       <div class="arch-layer">
         <div class="arch-box supabase">auth.users</div>
@@ -372,6 +405,7 @@
         <div class="arch-box supabase">projects</div>
         <div class="arch-box supabase">user_projects</div>
         <div class="arch-box supabase">time_entries</div>
+        <div class="arch-box supabase">calendar_mappings</div>
       </div>
       <div class="arch-layer">
         <div class="arch-box rls">RLS: users see own data only</div>
@@ -391,8 +425,9 @@
       <span class="stack-tag">Google OAuth</span>
       <span class="stack-tag">Document PiP API</span>
       <span class="stack-tag">Amplitude Browser SDK</span>
+      <span class="stack-tag">Google Calendar API</span>
       <span class="stack-tag">CSS Custom Properties</span>
-      <span class="stack-tag">GitHub Pages</span>
+      <span class="stack-tag">Vercel</span>
     </div>
   </div>
 </section>
@@ -409,16 +444,17 @@
         <tr><th>Event</th><th>Properties</th><th>Trigger</th></tr>
       </thead>
       <tbody>
-        <tr><td><code>Timer Started</code></td><td>project_name, is_billable, source</td><td>User starts a timer</td></tr>
+        <tr><td><code>Sign In Completed</code></td><td>&mdash;</td><td>User completes Google SSO login</td></tr>
+        <tr><td><code>Timer Started</code></td><td>project_name, is_billable, source</td><td>User or calendar sync starts a timer</td></tr>
         <tr><td><code>Timer Paused</code></td><td>project_name, is_billable, duration_seconds, source</td><td>User pauses a timer</td></tr>
-        <tr><td><code>Timer Stopped</code></td><td>project_name, is_billable, duration_seconds, source</td><td>User stops a timer</td></tr>
-        <tr><td><code>Note Submitted</code></td><td>project_name, is_billable, note_text</td><td>User saves a session note</td></tr>
+        <tr><td><code>Timer Stopped</code></td><td>project_name, is_billable, duration_seconds, source</td><td>User, calendar, or idle timeout stops a timer</td></tr>
+        <tr><td><code>Note Submitted</code></td><td>project_name, is_billable, note_length</td><td>User saves a session note</td></tr>
         <tr><td><code>Note Skipped</code></td><td>project_name, is_billable</td><td>User skips the note</td></tr>
         <tr><td><code>Widget Popped Out</code></td><td>&mdash;</td><td>User opens the floating widget</td></tr>
-        <tr><td><code>Widget Popped In</code></td><td>&mdash;</td><td>User closes the floating widget back into the main app</td></tr>
-        <tr><td><code>Project Created</code></td><td>project_name, is_billable</td><td>Admin creates a project</td></tr>
-        <tr><td><code>Project Assigned</code></td><td>project_name, user_email</td><td>Admin assigns a project</td></tr>
-        <tr><td><code>Sign In Completed</code></td><td>auth_provider</td><td>User completes login</td></tr>
+        <tr><td><code>Widget Popped In</code></td><td>&mdash;</td><td>User closes the widget back into the main app</td></tr>
+        <tr><td><code>Calendar Event Linked</code></td><td>event_title, project_name, keyword</td><td>User maps a calendar event to a project</td></tr>
+        <tr><td><code>Idle Timeout</code></td><td>project_name, rewinded_seconds</td><td>Timer auto-stopped after 30 min inactivity</td></tr>
+        <tr><td><code>Project Removed</code></td><td>project_name, is_billable</td><td>User removes a project from their list</td></tr>
       </tbody>
     </table>
   </div>
@@ -541,40 +577,43 @@ Format as a concise biweekly report for leadership.</div>
 
   <div class="roadmap-cols">
     <div class="roadmap-col">
-      <h3><span class="dot" style="background:var(--green)"></span> Immediate</h3>
+      <h3><span class="dot" style="background:var(--green)"></span> Completed</h3>
       <ul>
-        <li>Deploy to Netlify or Vercel</li>
-        <li>Push to GitHub (new repo)</li>
-        <li>Add Amplitude SDK with project API key</li>
-        <li>Seed all PS projects via admin panel</li>
-        <li>Invite the team (Google SSO)</li>
+        <li>&#10003; Deployed to Vercel</li>
+        <li>&#10003; Amplitude SDK integrated</li>
+        <li>&#10003; Google Calendar auto-start/stop</li>
+        <li>&#10003; Idle timeout with time rewind</li>
+        <li>&#10003; Admin bulk assign + Users tab</li>
+        <li>&#10003; Manage Projects (type-to-confirm)</li>
+        <li>&#10003; Toast notifications for calendar sync</li>
       </ul>
     </div>
     <div class="roadmap-col">
-      <h3><span class="dot" style="background:var(--amber)"></span> Short-term</h3>
+      <h3><span class="dot" style="background:var(--amber)"></span> Immediate</h3>
       <ul>
-        <li>Keyboard shortcuts in PiP widget</li>
+        <li>Derived properties &amp; custom metrics in Amplitude</li>
+        <li>Charts &amp; Dashboards (team visibility)</li>
+        <li>Automated Slack reports via AI Agents</li>
+        <li>Onboard 1&ndash;2 colleagues for testing</li>
+        <li>Seed all PS projects via admin panel</li>
+      </ul>
+    </div>
+    <div class="roadmap-col">
+      <h3><span class="dot" style="background:var(--accent)"></span> Short-term</h3>
+      <ul>
+        <li>Claude MCP &mdash; query Amplitude for project time &amp; notes</li>
+        <li>AI-generated biweekly reports from session notes</li>
         <li>CSV / Google Sheets export</li>
         <li>Date range picker for time log</li>
-        <li>Bulk project assignment</li>
       </ul>
     </div>
     <div class="roadmap-col">
-      <h3><span class="dot" style="background:var(--accent)"></span> Medium-term</h3>
+      <h3><span class="dot" style="background:var(--pink)"></span> Medium-term</h3>
       <ul>
+        <li>Push time entries into Mavenlink via API</li>
+        <li>Mavenlink &rarr; SFDC sync for biweekly reports</li>
         <li>Team dashboard (manager view)</li>
-        <li>Mavenlink / PSA tool integration (syncs to SFDC)</li>
-        <li>Daily / weekly email digest per user</li>
-        <li>Mobile-responsive PiP alternative</li>
-      </ul>
-    </div>
-    <div class="roadmap-col">
-      <h3><span class="dot" style="background:var(--pink)"></span> Long-term</h3>
-      <ul>
-        <li>AI-generated biweekly reports</li>
-        <li>Smart project suggestions from calendar</li>
         <li>Budget tracking (est. vs. actual)</li>
-        <li>Client-facing time reports</li>
       </ul>
     </div>
   </div>
